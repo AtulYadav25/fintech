@@ -1,5 +1,48 @@
 import fastify from "fastify";
+import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
+import { config } from "./config/env";
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+
+//Routes
+import { authRoutes } from "./routes/auth.routes";
+import { errorHandler } from "./middlewares/errorHandler";
 
 const app = fastify({ logger: false });
+
+const allowedOrigins = []; //Add real domain when in production
+
+if (config.NODE_ENV === 'development') {
+    allowedOrigins.push('http://localhost:5173');
+}
+
+app.register(cors, {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+});
+
+app.register(cookie, {
+    secret: "super-secret-key",
+    parseOptions: {},
+});
+
+app.get("/", async (req, reply) => {
+    return reply.code(200).send({
+        success: true,
+        message: "Welcome to Zorvyn Fintech Backend"
+    });
+})
+
+// Validation
+app.setValidatorCompiler(validatorCompiler);
+app.setSerializerCompiler(serializerCompiler);
+
+//Error Handler
+app.setErrorHandler(errorHandler);
+
+//Routes
+app.register(authRoutes, { prefix: "/api/v1/auth" });
+
 
 export default app;
