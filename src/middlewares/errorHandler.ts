@@ -7,7 +7,20 @@ export const errorHandler = (err: FastifyError, req: FastifyRequest, reply: Fast
         return reply.code(400).send({
             success: false,
             message: "Validation error",
-            error: err.format()
+            error: {
+                message: "Invalid Input"
+            }
+        })
+    }
+
+    //Fastify Validation Error
+    if (err && err.code === "FST_ERR_VALIDATION") {
+        return reply.code(400).send({
+            success: false,
+            message: "Validation error",
+            error: {
+                message: "Invalid Input"
+            }
         })
     }
 
@@ -16,6 +29,8 @@ export const errorHandler = (err: FastifyError, req: FastifyRequest, reply: Fast
     return reply.code(500).send({
         success: false,
         message: "Internal server error",
-        error: err.message
+        error: {
+            message: err.message
+        }
     })
 }

@@ -1,11 +1,14 @@
 import app from "./app";
 import { config } from "./config/env";
 import connectDB from "./config/db";
+import { initRedis } from "./config/redis";
 
 const startServer = async () => {
 
     //Connect MongoDB
     await connectDB();
+    //Connect Redis
+    await initRedis();
 
     try {
         await app.listen({

@@ -8,9 +8,12 @@ export interface IUser extends Document {
     password: string;
     role: "viewer" | "analyst" | "admin";
     isVerified: boolean;
+    isActive: boolean;
+    isDeleted: boolean;
+    deletedAt: Date;
     createdAt: Date;
     updatedAt: Date;
-
+    department: string;
     //Method to validate password on login
     comparePassword: (password: string) => Promise<boolean>;
 }
@@ -24,6 +27,7 @@ const UserSchema: Schema = new Schema<IUser>({
         type: String,
         required: true,
         unique: true,
+        index: true,
         lowercase: true,
         trim: true,
     },
@@ -31,6 +35,25 @@ const UserSchema: Schema = new Schema<IUser>({
         type: String,
         required: true,
         select: false, //Exclude Password from queries by default
+    },
+    isActive: {
+        type: Boolean,
+        default: false, //TODO: Add logic to activate user after verification
+    },
+    department: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false,
+        select: false,
+    },
+    deletedAt: {
+        type: Date,
+        default: null,
+        select: false,
     },
     role: {
         type: String,
@@ -58,7 +81,7 @@ UserSchema.pre("save", async function () {
 /* METHODS */
 
 UserSchema.methods.comparePassword = async function (password: string) {
-    return bcrypt.compare(password, this.password);
+    return bcrypt.compare(password, this.password as string);
 }
 
 export default mongoose.model<IUser>("User", UserSchema);

@@ -7,6 +7,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 //Routes
 import { authRoutes } from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/errorHandler";
+import { transactionRoutes } from "./routes/transaction.routes";
 
 const app = fastify({ logger: false });
 
@@ -43,6 +44,7 @@ app.setErrorHandler(errorHandler);
 
 //Routes
 app.register(authRoutes, { prefix: "/api/v1/auth" });
+app.register(transactionRoutes, { prefix: "/api/v1/transaction" });
 
 
 export default app;
