@@ -6,7 +6,7 @@ export const createTransactionSchema = z.object({
     type: z.enum(Object.values(TRANSACTION_TYPES), { message: "Type must be income or expense" }),
     category: z.string().min(1, "Category is required"),
     department: z.string().min(1, "Department is required"),
-    date: z.string().transform((val) => new Date(val)),
+    date: z.string().transform((val) => new Date(val)).refine((val) => !isNaN(val.getTime()), { message: "Invalid Date" }),
     description: z.string().optional(),
     reference: z.string().optional(),
 })
@@ -62,20 +62,19 @@ export const UpdateTransactionSchema = z.object({
 export type UpdateTransactionInput = z.infer<typeof UpdateTransactionSchema>;
 
 //Get Summarize Transaction
-export const GetSummarizeTransactionParams = z.object({
+export const GetSummarizeTransactionQuery = z.object({
     userId: z.string().optional(),
     department: z.string().optional(),
+    role: z.string().optional(),
     startDate: z
         .string()
         .optional()
-        .default(new Date().getFullYear() + 1 + "-04-01") //Default to financial year start date of this year
         .transform((val) => (val ? new Date(val) : undefined)),
 
     endDate: z
         .string()
         .optional()
-        .default(new Date().getFullYear() + 1 + "-03-31") //Default to financial year end date of this year
         .transform((val) => (val ? new Date(val) : undefined)),
 })
 
-export type GetSummarizeTransactionParams = z.infer<typeof GetSummarizeTransactionParams>;
+export type GetSummarizeTransactionQuery = z.infer<typeof GetSummarizeTransactionQuery>;

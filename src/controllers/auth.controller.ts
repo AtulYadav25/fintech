@@ -5,12 +5,13 @@ import { errorResponse, successResponse } from "../utils/responseHandler";
 import { loginInput, SignUpInput } from "../validators/auth.schema";
 import { config } from "../config/env";
 import { durationToSeconds, generateToken } from "../utils/jwt";
+import mongoose from "mongoose";
 
 
 export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput }>, reply: FastifyReply) => {
     try {
         // Request Body Already Validated in routes
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, department } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -22,6 +23,7 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
         const user = await User.create({
             name,
             email,
+            department,
             password,
             role: role || ROLES.VIEWER
         })
@@ -30,6 +32,7 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
             name: user.name,
             email: user.email,
             role: user.role,
+            department: user.department,
             isVerified: user.isVerified,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt
@@ -62,7 +65,11 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
         }
 
         // Generate JWT Token
-        const token = generateToken({ _id: user._id.toString(), email: user.email, role: user.role });
+        const token = generateToken({ _id: user._id.toString(), email: user.email, role: user.role, department: user.department });
+
+        //Make User Status active
+        user.isActive = true;
+        await user.save();
 
         // Set Cookie
         reply.setCookie("token", token, {
@@ -76,6 +83,7 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
         return successResponse(reply, {
             name: user.name,
             email: user.email,
+            department: user.department,
             role: user.role,
             isVerified: user.isVerified,
             createdAt: user.createdAt,
@@ -84,6 +92,16 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
 
     } catch (error) {
         return errorResponse(reply, "Failed to login user", 500, error);
+    }
+}
+
+//Logout User
+export const logoutUserHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+        reply.clearCookie("token");
+        return successResponse(reply, {}, "User logged out successfully", 200);
+    } catch (error) {
+        return errorResponse(reply, "Failed to logout user", 500, error);
     }
 }
 
@@ -98,6 +116,10 @@ export const verifyUserHandler = async (req: FastifyRequest<{ Params: { userId: 
             return errorResponse(reply, "User not found", 404);
         }
 
+        if (user.isVerified) {
+            return errorResponse(reply, "User already verified", 400);
+        }
+
         // Verify user
         user.isVerified = true;
         await user.save();
@@ -105,15 +127,24 @@ export const verifyUserHandler = async (req: FastifyRequest<{ Params: { userId: 
         return successResponse(reply, {}, "User verified successfully", 200);
 
     } catch (error) {
+        console.log(error)
         return errorResponse(reply, "Failed to verify user", 500, error);
     }
 }
 
-//Update User Role (ADMIN ONLY)
-export const updateUserRoleHandler = async (req: FastifyRequest<{ Params: { userId: string }, Body: { role: UserRole } }>, reply: FastifyReply) => {
+//Update User (ADMIN ONLY)
+export const updateUserHandler = async (req: FastifyRequest<{ Params: { userId: string }, Body: { role: UserRole, department: string } }>, reply: FastifyReply) => {
     try {
         const { userId } = req.params;
-        const { role } = req.body;
+        const { role, department } = req.body;
+
+        if (userId === req.user._id.toString()) {
+            return errorResponse(reply, "You cannot update your own role", 400);
+        }
+
+        if (!role && !department) {
+            return errorResponse(reply, "Please provide either role or department", 400);
+        }
 
         // Check if user exists
         const user = await User.findById(userId);
@@ -122,10 +153,11 @@ export const updateUserRoleHandler = async (req: FastifyRequest<{ Params: { user
         }
 
         // Update user role
-        user.role = role;
+        if (role) user.role = role;
+        if (department) user.department = department;
         await user.save();
 
-        return successResponse(reply, {}, "User role updated successfully", 200);
+        return successResponse(reply, {}, "User updated successfully", 200);
 
     } catch (error) {
         return errorResponse(reply, "Failed to update user role", 500, error);
@@ -156,10 +188,26 @@ export const deleteUserHandler = async (req: FastifyRequest<{ Params: { userId: 
     }
 }
 
-//Get All Users (ADMIN ONLY)
-export const getAllUsersHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+//Get All Users (ADMIN Can Access All Department Users and Analyst can access only their own department users)
+export const getAllUsersHandler = async (req: FastifyRequest<{ Querystring: { role: UserRole, department: string } }>, reply: FastifyReply) => {
     try {
-        const users = await User.find({ isDeleted: false });
+        const { role, department } = req.user;
+        const { role: queryRole, department: queryDepartment } = req.query;
+
+        let filter: any = {
+            isDeleted: false
+        }
+
+        //Admin can access all department users and Analyst can access only their own department users
+        if (role === ROLES.ADMIN) {
+            if (queryRole) filter.role = queryRole;
+            if (queryDepartment) filter.department = queryDepartment;
+        } else {
+            filter.department = department
+            if (queryRole) filter.role = queryRole;
+        }
+
+        const users = await User.find(filter);
         return successResponse(reply, users, "Users fetched successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to fetch users", 500, error);

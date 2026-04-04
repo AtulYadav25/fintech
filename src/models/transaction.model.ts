@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
+import redisClient from "../config/redis";
 
 export interface ITransaction extends Document {
     userId: Types.ObjectId;
@@ -71,4 +72,51 @@ const TransactionSchema: Schema = new Schema({
 TransactionSchema.index({ userId: 1, date: -1 });
 TransactionSchema.index({ userId: 1, type: 1, category: 1 });
 
+
+const clearCache = async function (doc: any) {
+    const department = doc?.department || this.getQuery()?.department;
+
+    if (!department) return;
+
+    //Get all the keys for the specific department
+    const rawKeys = await redisClient.sMembers(`tx_summary_keys:${department}`);
+    // Also Delete the department with "all" key (That was added by the Analyst or Admin Filtered Data)
+    const rawKeysAll = await redisClient.sMembers(`tx_summary_keys:all`);
+
+    //Because redisClient.sMembers() returns values as string[] or Set<string>
+
+    //For specific department filtered data stored in cache
+    const keys = Array.isArray(rawKeys)
+        ? rawKeys
+        : Array.from(rawKeys);
+
+    //For "All" department filtered data stored in cache
+    const keysAll = Array.isArray(rawKeysAll)
+        ? rawKeysAll
+        : Array.from(rawKeysAll);
+
+    if (keys.length > 0) {
+        await redisClient.del(keys);
+    }
+
+    if (keysAll.length > 0) {
+        await redisClient.del(keysAll);
+    }
+
+    await redisClient.del(`tx_summary_keys:${department}`);
+};
+
+//Delete Redis Cache of the updated transaction's department if any transaction is updated or any created
+TransactionSchema.post("save", clearCache);
+TransactionSchema.post("findOneAndUpdate", clearCache);
+TransactionSchema.post("updateOne", clearCache);
+TransactionSchema.post("deleteOne", clearCache);
+
+
 export default mongoose.model<ITransaction>("Transaction", TransactionSchema);
+
+//TODO: Test All API Endpoints with all possible test cases
+//TODO: Add Search Support for transaction
+//TODO: Add Rate Limiting in transactions
+//TODO: Unit tests or integration tests
+//TODO: API documentation

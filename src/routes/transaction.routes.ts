@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { authMiddleware, hasPermissions } from "../middlewares/auth";
-import { createTransactionSchema, UpdateTransactionSchema, GetAllTransactionsParams } from "../validators/transaction.schema";
+import { createTransactionSchema, UpdateTransactionSchema, GetAllTransactionsParams, GetSummarizeTransactionQuery } from "../validators/transaction.schema";
 import * as TransactionController from "../controllers/transaction.controller";
 import { PERMISSIONS } from "../constants/roles";
 import z from "zod"
@@ -32,6 +32,12 @@ export const transactionRoutes = async (app: FastifyInstance) => {
         schema: { querystring: GetAllTransactionsParams },
         preHandler: hasPermissions([PERMISSIONS.READ_LIMITED])
     }, TransactionController.getAllTransactionsHandler)
+
+    //Get Summarized Transaction
+    app.get("/summary", {
+        schema: { querystring: GetSummarizeTransactionQuery },
+        preHandler: hasPermissions([PERMISSIONS.READ_ALL])
+    }, TransactionController.getAllTransactionsSummaryHandler)
 
 }
 

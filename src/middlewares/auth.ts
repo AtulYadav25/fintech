@@ -12,15 +12,15 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
             });
         }
 
-        const { _id, email, role }: any = verifyToken(token);
+        const { _id, email, role, department }: any = verifyToken(token);
 
-        if (!_id || !email || !role) {
+        if (!_id || !email || !role || !department) {
             return reply.code(401).send({
                 message: "Unauthorized: Invalid or expired token",
             });
         }
 
-        req.user = { _id, email, role };
+        req.user = { _id, email, role, department };
 
     } catch (err) {
         return reply.code(401).send({

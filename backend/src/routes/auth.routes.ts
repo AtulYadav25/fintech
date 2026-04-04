@@ -13,20 +13,17 @@ export const authRoutes = async (app: FastifyInstance) => {
 
     //Authenticated Routes
 
-    //Logout User
-    app.post("/logout", { preHandler: authMiddleware }, AuthController.logoutUserHandler)
-
     //Verify User (ADMIN ONLY)
     app.patch("/verify/:userId", {
         schema: { params: z.object({ userId: z.string() }) },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.verifyUserHandler)
 
-    //Update User
-    app.patch("/:userId", {
-        schema: { params: z.object({ userId: z.string() }), body: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }) },
+    //Update User Role
+    app.patch("/role/:userId", {
+        schema: { params: z.object({ userId: z.string() }), body: z.object({ role: z.enum(Object.values(ROLES)) }) },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
-    }, AuthController.updateUserHandler)
+    }, AuthController.updateUserRoleHandler)
 
     //Delete User
     app.delete("/:userId", {
@@ -34,10 +31,10 @@ export const authRoutes = async (app: FastifyInstance) => {
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.deleteUserHandler)
 
-    //Get All User (ADMIN Can Access All Department Users and Analyst can access only their own department users)
-    app.get("/all", {
-        schema: { querystring: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }) },
-        preHandler: [authMiddleware, hasPermissions([PERMISSIONS.READ_ALL])]
+    //Get All Users
+
+    app.get("/", {
+        preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.getAllUsersHandler)
 }
 
@@ -50,18 +47,10 @@ export const authRoutes = async (app: FastifyInstance) => {
 */
 
 /**
- * @route PATCH /:userId
- * @description Update a user role or department, only role with permission manage:user can access
+ * @route PATCH /role/:userId
+ * @description Update a user role, only role with permission manage:user can access
  * @access Private (Admin only)
  * @param {string} userId - The ID of the user to update
  * @body {string} role - The new role of the user
- * @body {string} department - The new department of the user
  * @returns {object} - Success message
-*/
-
-/**
- * @route GET /all
- * @description Get all users, only role with permission read:all can access
- * @access Private (Admin and Analyst)
- * @returns {object} - Array of users
 */

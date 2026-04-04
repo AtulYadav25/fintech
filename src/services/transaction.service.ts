@@ -1,5 +1,5 @@
 import Transaction, { ITransaction } from "../models/transaction.model";
-import { GetSummarizeTransactionParams, type GetAllTransactionsParams } from "../validators/transaction.schema";
+import { GetSummarizeTransactionQuery, type GetAllTransactionsParams } from "../validators/transaction.schema";
 import redisClient from "../config/redis";
 
 /**
@@ -121,12 +121,13 @@ export const getTransactionsSummary = async ({
     startDate,
     endDate,
     userId,
-    department
-}: GetSummarizeTransactionParams) => {
+    department,
+    role
+}: GetSummarizeTransactionQuery) => {
 
 
     //Check cache first
-    const cacheKey = `tx_summary:${startDate}:${endDate}:${department}`;
+    const cacheKey = `tx_summary:${department || "all"}:${startDate || "all"}:${endDate || "all"}`;
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
         const parsed =
@@ -325,14 +326,18 @@ export const getTransactionsSummary = async ({
         },
     ]);
 
-    //Store in Redis - Store for 1 day
-    await redisClient.setEx(cacheKey, 86400, JSON.stringify(summary));
+    //Store in Redis - Store for 2 hours
+    await redisClient.setEx(cacheKey, 7200, JSON.stringify(summary));
+
+    // Track this key
+    await redisClient.sAdd(`tx_summary_keys:${department}`, cacheKey);
 
     return summary || {
         totalIncome: 0,
         totalExpense: 0,
         netBalance: 0,
         categoryWise: [],
+        departmentWise: [],
         recentActivity: [],
         monthlyTrends: [],
     };

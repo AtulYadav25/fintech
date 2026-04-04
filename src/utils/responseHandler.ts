@@ -42,6 +42,17 @@ export const errorResponse = (reply: FastifyReply, message = "Something went wro
         });
     }
 
+    //Handle Mongoose Object ID Cast Error
+    if (error && error.kind === "ObjectId") {
+        return reply.code(400).send({
+            success: false,
+            message: "Invalid ID",
+            error: {
+                message: "Invalid Mongoose ID"
+            }
+        })
+    }
+
     if (error && error.message === "NOT_FOUND") {
         return reply.code(404).send({
             success: false,

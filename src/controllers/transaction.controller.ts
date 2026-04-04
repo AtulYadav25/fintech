@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateTransactionInput, type GetAllTransactionsParams, GetSummarizeTransactionParams, UpdateTransactionInput } from "../validators/transaction.schema";
+import { CreateTransactionInput, type GetAllTransactionsParams, GetSummarizeTransactionQuery, UpdateTransactionInput } from "../validators/transaction.schema";
 import Transaction from "../models/transaction.model";
 import { errorResponse, paginationResponse, successResponse } from "../utils/responseHandler";
 import { deleteTransaction, getAllTransactions, getTransactionsSummary, updateTransaction } from "../services/transaction.service";
@@ -28,7 +28,8 @@ export const createTransactionHandler = async (req: FastifyRequest<{ Body: Creat
         });
 
         return successResponse(reply, transaction, "Transaction created successfully", 201);
-    } catch (error) {
+    } catch (error: any) {
+        console.log(error)
         return errorResponse(reply, "Failed to create transaction", 500, error);
     }
 }
@@ -113,8 +114,8 @@ export const getAllTransactionsHandler = async (req: FastifyRequest<{ Querystrin
             type,
             startDate,
             endDate,
-            userId: role === ROLES.ADMIN || role === ROLES.ANALYST ? userId : req.user._id, //Admin can view all transactions, analyst and viewer can only view their own transactions
-            department: role === ROLES.ADMIN ? department : userDepartment //Admin can view all departments, analyst and viewer can only view their own department
+            userId: role === ROLES.ADMIN || role === ROLES.ANALYST ? userId : undefined,
+            department: role === ROLES.ADMIN ? department : userDepartment //Admin can view all departments, analyst and viewer can only view their own department transactions
         });
 
         //Returns Paginated Response
@@ -171,17 +172,20 @@ export const getAllTransactionsHandler = async (req: FastifyRequest<{ Querystrin
  * }>} - Summarized transaction data
  */
 
-export const getAllTransactionsSummaryHandler = async (req: FastifyRequest<{ Querystring: GetSummarizeTransactionParams }>, reply: FastifyReply) => {
+export const getAllTransactionsSummaryHandler = async (req: FastifyRequest<{ Querystring: GetSummarizeTransactionQuery }>, reply: FastifyReply) => {
     try {
         const { startDate, endDate, userId, department } = req.query;
         const { role, department: userDepartment } = req.user;
+
+        console.log(req.user)
 
         //Get Filtered Transactions
         const data = await getTransactionsSummary({
             startDate,
             endDate,
-            userId: role === ROLES.ADMIN || role === ROLES.ANALYST ? userId : req.user._id,
-            department: role === ROLES.ADMIN ? department : userDepartment
+            userId: role === ROLES.ADMIN || role === ROLES.ANALYST ? userId : undefined,
+            department: role === ROLES.ADMIN ? department : userDepartment,
+            role //Not to filter but to validate, if user is admin, then only allow department filter
         });
 
         //Returns Paginated Response
