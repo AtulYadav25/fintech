@@ -2,6 +2,7 @@ import app from "./app";
 import { config } from "./config/env";
 import connectDB from "./config/db";
 import { initRedis } from "./config/redis";
+import { seedInitialAdmin } from "./seeders/initializeAdminSeeder";
 
 const startServer = async () => {
 
@@ -9,6 +10,8 @@ const startServer = async () => {
     await connectDB();
     //Connect Redis
     await initRedis();
+    //Seed Initial Admin
+    await seedInitialAdmin();
 
     try {
         await app.listen({

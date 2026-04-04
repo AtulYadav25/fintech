@@ -16,6 +16,12 @@ export const authRoutes = async (app: FastifyInstance) => {
     //Logout User
     app.post("/logout", { preHandler: authMiddleware }, AuthController.logoutUserHandler)
 
+    //Forgot Password
+    // app.post("/forgot-password", AuthController.forgotPasswordHandler)
+
+    //Reset Password
+    // app.post("/reset-password", AuthController.resetPasswordHandler)
+
     //Verify User (ADMIN ONLY)
     app.patch("/verify/:userId", {
         schema: { params: z.object({ userId: z.string() }) },
