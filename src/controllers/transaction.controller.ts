@@ -177,8 +177,6 @@ export const getAllTransactionsSummaryHandler = async (req: FastifyRequest<{ Que
         const { startDate, endDate, userId, department } = req.query;
         const { role, department: userDepartment } = req.user;
 
-        console.log(req.user)
-
         //Get Filtered Transactions
         const data = await getTransactionsSummary({
             startDate,

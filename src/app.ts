@@ -3,11 +3,13 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import { config } from "./config/env";
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import rateLimit from '@fastify/rate-limit'
 
 //Routes
 import { authRoutes } from "./routes/auth.routes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { transactionRoutes } from "./routes/transaction.routes";
+import { chatRoutes } from "./routes/chat.routes";
 
 const app = fastify({ logger: false });
 
@@ -16,6 +18,12 @@ const allowedOrigins = []; //Add real domain when in production
 if (config.NODE_ENV === 'development') {
     allowedOrigins.push('http://localhost:5173');
 }
+
+app.register(rateLimit, {
+    max: 100,
+    timeWindow: '1 minute',
+    keyGenerator: (req) => req.ip,
+});
 
 app.register(cors, {
     origin: allowedOrigins,
@@ -45,6 +53,7 @@ app.setErrorHandler(errorHandler);
 //Routes
 app.register(authRoutes, { prefix: "/api/v1/auth" });
 app.register(transactionRoutes, { prefix: "/api/v1/transaction" });
+app.register(chatRoutes, { prefix: "/api/v1/chat" });
 
 
 export default app;

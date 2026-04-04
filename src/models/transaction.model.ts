@@ -115,8 +115,6 @@ TransactionSchema.post("deleteOne", clearCache);
 
 export default mongoose.model<ITransaction>("Transaction", TransactionSchema);
 
-//TODO: Test All API Endpoints with all possible test cases
+
 //TODO: Add Search Support for transaction
-//TODO: Add Rate Limiting in transactions
-//TODO: Unit tests or integration tests
 //TODO: API documentation

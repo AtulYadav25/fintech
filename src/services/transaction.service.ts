@@ -127,7 +127,7 @@ export const getTransactionsSummary = async ({
 
 
     //Check cache first
-    const cacheKey = `tx_summary:${department || "all"}:${startDate || "all"}:${endDate || "all"}`;
+    const cacheKey = `tx_summary:${department || "all"}:${startDate?.toISOString() || "all"}:${endDate?.toISOString() || "all"}`;
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
         const parsed =

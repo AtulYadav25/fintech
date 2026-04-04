@@ -5,9 +5,24 @@ import { errorResponse, successResponse } from "../utils/responseHandler";
 import { loginInput, SignUpInput } from "../validators/auth.schema";
 import { config } from "../config/env";
 import { durationToSeconds, generateToken } from "../utils/jwt";
-import mongoose from "mongoose";
 
-
+/**
+ * @description Sign up user
+ * @body name - Name of the user
+ * @body email - Email of the user
+ * @body password - Password of the user
+ * @body [role] - Role of the user
+ * @body department - Department of the user
+ * @returns {Promise<{
+            name: string,
+            email: string,
+            role: string,
+            department: string,
+            isVerified: boolean,
+            createdAt: Date,
+            updatedAt: Date
+        }>}
+ */
 export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput }>, reply: FastifyReply) => {
     try {
         // Request Body Already Validated in routes
@@ -43,6 +58,20 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
     }
 }
 
+/**
+ * @description Login user
+ * @param email - Email of the user
+ * @param password - Password of the user
+ * @returns {Promise<{
+            name: string,
+            email: string,
+            department: string,
+            role: string,
+            isVerified: boolean,
+            createdAt: Date,
+            updatedAt: Date
+        }>}
+ */
 export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>, reply: FastifyReply) => {
     try {
         const { email, password } = req.body;
@@ -106,6 +135,11 @@ export const logoutUserHandler = async (req: FastifyRequest, reply: FastifyReply
 }
 
 //Verify User (ADMIN ONLY)
+/**
+ * @description Verify user
+ * @param userId - ID of the user to verify
+ * @returns {Promise<void>}
+ */
 export const verifyUserHandler = async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
     try {
         const { userId } = req.params;
@@ -133,6 +167,13 @@ export const verifyUserHandler = async (req: FastifyRequest<{ Params: { userId: 
 }
 
 //Update User (ADMIN ONLY)
+/**
+ * @description Update user role or department
+ * @param userId - ID of the user to update
+ * @body role - New role of the user
+ * @body department - New department of the user
+ * @returns {Promise<void>}
+ */
 export const updateUserHandler = async (req: FastifyRequest<{ Params: { userId: string }, Body: { role: UserRole, department: string } }>, reply: FastifyReply) => {
     try {
         const { userId } = req.params;
@@ -165,6 +206,11 @@ export const updateUserHandler = async (req: FastifyRequest<{ Params: { userId: 
 }
 
 //Delete User (ADMIN ONLY)
+/**
+ * @description Delete user
+ * @param userId - ID of the user to delete
+ * @returns {Promise<void>}
+ */
 export const deleteUserHandler = async (req: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) => {
     try {
         const { userId } = req.params;
