@@ -16,14 +16,14 @@ A secure and scalable backend system for a finance dashboard with Role-Based Acc
 
 ## Tech Stack
 
-- **Runtime**: Node.js + TypeScript
-- **Framework**: Fastify
-- **Database**: MongoDB with Mongoose
-- **Caching**: Redis
-- **Security**: JWT, bcrypt
-- **Validation**: Zod + fastify-type-provider-zod
-- **AI**: Google Gemini (`@google/genai`)
-- **DevOps**: Docker, Docker Compose
+- **Runtime**: ![Node.js](https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) 
+- **Framework**: ![Fastify](https://img.shields.io/badge/Fastify-000000?style=for-the-badge&logo=fastify&logoColor=white)  
+- **Database**: ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white) 
+- **Caching**: ![Redis](https://img.shields.io/badge/Redis-DC382C?style=for-the-badge&logo=redis&logoColor=white)  
+- **Security**: JWT, bcrypt  
+- **Validation**: Zod + fastify-type-provider-zod  
+- **AI**: ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)  
+- **DevOps**: ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white) 
 
 ## Project Structure
 
@@ -103,6 +103,10 @@ pnpm dev
 **Initial Admin** (auto-seeded on first run):
 - Email: `admin@company.com`
 - Password: `Admin@9870245`
+
+## Test with Postman
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=Postman&logoColor=white)
+You can easily test the backend endpoints via Postman. Simply import the included `postman.postman_collection` file into your Postman workspace to get started.
 
 ## Role-Based Access Control
 

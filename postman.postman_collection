@@ -1,0 +1,594 @@
+{
+  "info": {
+    "_postman_id": "165fd5c6-6541-45d9-99bc-3ea53ffdab0f",
+    "name": "Fintech Backend",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "49026217",
+    "_collection_link": "https://go.postman.co/collection/49026217-165fd5c6-6541-45d9-99bc-3ea53ffdab0f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "ADMIN",
+          "item": [
+            {
+              "name": "VERIFY USER",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/api/v1/auth/verify/69d22c1b883c074319f87869",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "verify",
+                    "69d22c1b883c074319f87869"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"role\": \"analyst\",\r\n    \"department\": \"Marketing\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/api/v1/auth/69d22c1b883c074319f87869",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "69d22c1b883c074319f87869"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"role\": \"analyst\",\r\n    \"department\": \"Marketing\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/api/v1/auth/69d22c1b883c074319f87869",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "69d22c1b883c074319f87869"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Get All Users",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseURL}}/api/v1/auth/users?role=analyst&department=Marketing",
+                  "host": [
+                    "{{baseURL}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "users"
+                  ],
+                  "query": [
+                    {
+                      "key": "role",
+                      "value": "analyst",
+                      "type": "text"
+                    },
+                    {
+                      "key": "department",
+                      "value": "Marketing",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Urus\",\r\n    \"email\": \"urus@gmail.com\",\r\n    \"password\": \"urus001\",\r\n    \"department\": \"Marketing\",\r\n    \"role\":\"viewer\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/auth/signup",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "signup"
+              ]
+            },
+            "description": "## Signup\n\nRegisters a new user account in the system.\n\n**Method:** `POST`  \n**URL:** `{{baseURL}}/api/v1/auth/signup`\n\n---\n\n### Request Body\n\nThe request body must be sent as raw JSON with the `Content-Type: application/json` header.\n\n| Field | Type | Required | Description |\n| --- | --- | --- | --- |\n| `name` | String | Yes | The full name of the user being registered. |\n| `email` | String | Yes | A valid, unique email address for the new user. |\n| `password` | String | Yes | The password for the new account. |\n| `department` | String | Yes | The Department of user |\n\n**Example:**\n\n``` json\n{\n  \"name\": \"Atul\",\n  \"email\": \"atul2@gmail.com\",\n  \"password\": \"Something\"\n}\n\n ```\n\n---\n\n### Notes\n\n- On success, the server registers the new user and typically returns a `201 Created` response along with the created user's details or an authentication token.\n    \n- The `email` field must be unique — attempting to register with an already existing email will result in an error response.\n    \n- Ensure the `password` meets any server-side strength requirements (e.g., minimum length)."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@company.com\",\r\n    \"password\": \"Admin@9870245\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/auth/login",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transaction",
+      "item": [
+        {
+          "name": "Create Transaction (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 97888,\r\n    \"type\": \"expense\",\r\n    \"category\": \"team\",\r\n    \"department\": \"Marketing\",\r\n    \"date\": \"2026-04-21\",\r\n    \"description\": \"Product Team Spent\",\r\n    \"reference\": \"TXN9A3K298P1\"\r\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/transaction/",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Transaction (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"amount\": 156000,\r\n    \"type\": \"expense\",\r\n    \"category\": \"food\",\r\n    \"date\": \"2026-01-03\",\r\n    \"description\": \"Spend on Hotel\",\r\n    \"department\": \"Sales\",\r\n    \"reference\": \"85ABG45855\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/transaction/69d23690251a7823aa6abef0",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "69d23690251a7823aa6abef0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Transaction (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/transaction/69d23690251a7823aa6abef0",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "69d23690251a7823aa6abef0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Summary of Transaction",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/transaction/summary",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2026-02-01",
+                  "disabled": true
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-05-05",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transactions",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/transaction",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "transaction"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "expense",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "car",
+                  "disabled": true
+                },
+                {
+                  "key": "category",
+                  "value": "fuel",
+                  "disabled": true
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "disabled": true
+                },
+                {
+                  "key": "startDate",
+                  "value": "2026-04-01",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "ChatWithAI",
+      "item": [
+        {
+          "name": "SendMessage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": " text/event-stream",
+                "type": "text"
+              },
+              {
+                "key": "Cache-Control",
+                "value": " no-cache",
+                "type": "text"
+              },
+              {
+                "key": "Connection",
+                "value": " keep-alive",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"message\": \"can you find how much total expense does the marketing department has done?\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/chat/",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Chat Sessions",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/chat/",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chat Session Messages",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/chat/69d2419609bb692d612fa7ea",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "69d2419609bb692d612fa7ea"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Chat Session",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/v1/chat/69d0f97db3eeae593ccb7558",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "chat",
+                "69d0f97db3eeae593ccb7558"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
