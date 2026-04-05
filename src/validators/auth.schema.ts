@@ -19,7 +19,7 @@ export type loginInput = z.infer<typeof loginSchema>;
 
 
 export const userResponseSchema = z.object({
-    _id: z.string(),
+    _id: z.any(), // ObjectId is not supported by Zod
     name: z.string(),
     email: z.string().email(),
     role: z.enum(Object.values(ROLES)),

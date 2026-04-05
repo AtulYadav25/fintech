@@ -5,6 +5,7 @@ export const createTransactionSchema = z.object({
     amount: z.number().positive("Amount must be positive"),
     type: z.enum(Object.values(TRANSACTION_TYPES), { message: "Type must be income or expense" }),
     category: z.string().min(1, "Category is required"),
+    tags: z.array(z.string()).optional(),
     department: z.string().min(1, "Department is required"),
     date: z.string().transform((val) => new Date(val)).refine((val) => !isNaN(val.getTime()), { message: "Invalid Date" }),
     description: z.string().optional(),
@@ -25,6 +26,13 @@ export const GetAllTransactionsParams = z.object({
         .transform((val) => (val ? Number(val) : 10)),
 
     type: z.string().optional(),
+    tags: z
+        .union([z.string(), z.array(z.string())])
+        .optional()
+        .transform((val) => {
+            if (!val) return undefined;
+            return typeof val === "string" ? [val] : val;
+        }),
     department: z.string().optional(),
     category: z
         .union([z.string(), z.array(z.string())])
@@ -56,6 +64,7 @@ export const UpdateTransactionSchema = z.object({
     department: z.string().min(1, "Department is required").optional(),
     date: z.string().transform((val) => new Date(val)).optional(),
     description: z.string().optional(),
+    tags: z.array(z.string()).optional(),
     reference: z.string().optional(),
 })
 
@@ -81,7 +90,7 @@ export type GetSummarizeTransactionQuery = z.infer<typeof GetSummarizeTransactio
 
 
 export const TransactionResponseSchema = z.object({
-    _id: z.string(),
+    _id: z.any(),
     amount: z.number(),
     type: z.enum(Object.values(TRANSACTION_TYPES)),
     category: z.string(),
@@ -89,8 +98,9 @@ export const TransactionResponseSchema = z.object({
     date: z.date(),
     description: z.string().optional(),
     reference: z.string().optional(),
-    userId: z.string(),
+    userId: z.any(),
     createdAt: z.date(),
+    tags: z.array(z.string()).optional(),
     updatedAt: z.date()
 })
 

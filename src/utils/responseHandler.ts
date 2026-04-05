@@ -38,7 +38,7 @@ export const errorResponse = (reply: FastifyReply, message = "Something went wro
             success: false,
             message,
             data: null,
-            error: { message: formattedErrors }
+            error: formattedErrors
         });
     }
 

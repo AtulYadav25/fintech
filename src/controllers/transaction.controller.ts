@@ -14,7 +14,7 @@ import { ROLES } from "../constants/roles";
  */
 export const createTransactionHandler = async (req: FastifyRequest<{ Body: CreateTransactionInput }>, reply: FastifyReply) => {
     try {
-        const { amount, type, category, date, description, reference, department } = req.body;
+        const { amount, type, category, date, description, reference, department, tags } = req.body;
 
         const transaction = await Transaction.create({
             userId: req.user._id,
@@ -22,6 +22,7 @@ export const createTransactionHandler = async (req: FastifyRequest<{ Body: Creat
             type,
             category,
             department,
+            tags,
             date,
             description,
             reference
@@ -29,7 +30,6 @@ export const createTransactionHandler = async (req: FastifyRequest<{ Body: Creat
 
         return successResponse(reply, TransactionResponseSchema.parse(transaction), "Transaction created successfully", 201);
     } catch (error: any) {
-        console.log(error)
         return errorResponse(reply, "Failed to create transaction", 500, error);
     }
 }
@@ -103,7 +103,7 @@ export const deleteTransactionHandler = async (req: FastifyRequest<{ Params: { i
  */
 export const getAllTransactionsHandler = async (req: FastifyRequest<{ Querystring: GetAllTransactionsParams }>, reply: FastifyReply) => {
     try {
-        const { page = 1, limit = 10, category, type, startDate, endDate, userId, department } = req.query;
+        const { page = 1, limit = 10, category, type, startDate, endDate, userId, department, tags } = req.query;
         const { role, department: userDepartment } = req.user;
 
         //Get Filtered Transactions
@@ -114,6 +114,7 @@ export const getAllTransactionsHandler = async (req: FastifyRequest<{ Querystrin
             type,
             startDate,
             endDate,
+            tags,
             userId: role === ROLES.ADMIN || role === ROLES.ANALYST ? userId : undefined,
             department: role === ROLES.ADMIN ? department : userDepartment //Admin can view all departments, analyst and viewer can only view their own department transactions
         });

@@ -38,7 +38,6 @@ export const chatWithAI = async ({ userId, role, department }: { userId: string,
 
     const sendEvent = (type: "status" | "token" | "done" | "error", msg: string) => {
         reply.raw.write(`data: ${JSON.stringify({ type, message: msg })}\n\n`);
-        console.log(type, " : ", msg);
     };
 
     reply.raw.on("close", () => {
@@ -81,6 +80,7 @@ Instructions:
 If the user's request requires fetching data from the MongoDB database, generate a valid JSON object describing the query. Only provide read queries (find or aggregation). Do not provide update queries. Always include { "isDeleted": false } in your filters.
 CRITICAL: If the user's 'role' is NOT 'admin', you MUST strictly add a filter to your query/pipeline to only fetch data where the 'department' field exactly matches the user's department ("${department}"). Do not allow querying data from other departments.
 If no data is needed, return {"collection": null}.
+CRITICAL: All queries for (department, category, tags) must be case-insensitive. Ensure that string comparisons (e.g., for fields like "department") match values regardless of letter casing. For example, a query for "marketing" must also match "Marketing", "MARKETING", or any other case variation.
 Return ONLY valid JSON. No markdown formatting or extra text.
 For date filtering, assume dates are ISO strings or construct them properly if aggregate pipeline is used.
 

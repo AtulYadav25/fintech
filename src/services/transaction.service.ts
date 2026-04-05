@@ -15,6 +15,7 @@ export const getAllTransactions = async ({
     category,
     startDate,
     endDate,
+    tags,
     userId,
     department
 }: GetAllTransactionsParams) => {
@@ -27,14 +28,12 @@ export const getAllTransactions = async ({
     if (type) filter.type = type;
     if (category) filter.category = category;
     if (department) filter.department = department;
-
+    if (tags) filter.tags = tags;
     if (startDate || endDate) {
         filter.date = {};
         if (startDate) filter.date.$gte = startDate;
         if (endDate) filter.date.$lte = endDate;
     }
-
-    console.log(filter)
 
     const transactions = await Transaction.find(filter)
         .sort({ date: -1 })
@@ -256,6 +255,8 @@ export const getTransactionsSummary = async ({
                             type: 1,
                             category: 1,
                             date: 1,
+                            department: 1,
+                            reference: 1,
                             description: 1,
                         },
                     },
@@ -331,6 +332,10 @@ export const getTransactionsSummary = async ({
 
     // Track this key
     await redisClient.sAdd(`tx_summary_keys:${department}`, cacheKey);
+
+    if (!department) {
+        await redisClient.sAdd(`tx_summary_keys:all`, cacheKey);
+    }
 
     return summary || {
         totalIncome: 0,

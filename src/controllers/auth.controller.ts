@@ -145,7 +145,6 @@ export const verifyUserHandler = async (req: FastifyRequest<{ Params: { userId: 
         return successResponse(reply, {}, "User verified successfully", 200);
 
     } catch (error) {
-        console.log(error)
         return errorResponse(reply, "Failed to verify user", 500, error);
     }
 }
