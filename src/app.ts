@@ -4,6 +4,7 @@ import cookie from "@fastify/cookie";
 import { config } from "./config/env";
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import rateLimit from '@fastify/rate-limit'
+import swaggerPlugin from "./plugins/swagger";
 
 //Routes
 import { authRoutes } from "./routes/auth.routes";
@@ -31,10 +32,9 @@ app.register(cors, {
     credentials: true,
 });
 
-app.register(cookie, {
-    secret: "super-secret-key",
-    parseOptions: {},
-});
+app.register(cookie);
+
+app.register(swaggerPlugin);
 
 app.get("/", async (req, reply) => {
     return reply.code(200).send({

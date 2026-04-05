@@ -4,17 +4,50 @@ import { signUpSchema, loginSchema } from "../validators/auth.schema";
 import z from "zod";
 import { authMiddleware, hasPermissions } from "../middlewares/auth";
 import { PERMISSIONS, ROLES } from "../constants/roles";
+import { userResponseSchema } from "../validators/auth.schema";
+import { createErrorResponseSchema, createSuccessResponseSchema } from "../validators/response.schema";
 
 export const authRoutes = async (app: FastifyInstance) => {
 
     //SignUp User
-    app.post("/signup", { schema: { body: signUpSchema } }, AuthController.signUpUserHandler)
-    app.post("/login", { schema: { body: loginSchema } }, AuthController.loginUserHandler)
+    app.post("/signup", {
+        schema: {
+            body: signUpSchema,
+            description: "Sign up user",
+            response: {
+                201: createSuccessResponseSchema(userResponseSchema), //User Created
+                409: createErrorResponseSchema(), //User Already Exists
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        }
+    }, AuthController.signUpUserHandler)
+
+    app.post("/login", {
+        schema: {
+            body: loginSchema,
+            description: "Login user",
+            response: {
+                200: createSuccessResponseSchema(userResponseSchema), //User Logged In
+                401: createErrorResponseSchema(), //Invalid Credentials
+                403: createErrorResponseSchema(), //Account Not Verified or Deleted
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        }
+    }, AuthController.loginUserHandler)
 
     //Authenticated Routes
 
     //Logout User
-    app.post("/logout", { preHandler: authMiddleware }, AuthController.logoutUserHandler)
+    app.post("/logout", {
+        schema: {
+            description: "Logout user",
+            response: {
+                200: createSuccessResponseSchema(), //User Logged Out
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        },
+        preHandler: authMiddleware
+    }, AuthController.logoutUserHandler)
 
     //Forgot Password
     // app.post("/forgot-password", AuthController.forgotPasswordHandler)
@@ -24,25 +57,62 @@ export const authRoutes = async (app: FastifyInstance) => {
 
     //Verify User (ADMIN ONLY)
     app.patch("/verify/:userId", {
-        schema: { params: z.object({ userId: z.string() }) },
+        schema: {
+            description: "Verify user",
+            params: z.object({ userId: z.string() }),
+            response: {
+                200: createSuccessResponseSchema(), //User Verified
+                400: createErrorResponseSchema(), //User Already Verified
+                404: createErrorResponseSchema(), //User Not Found
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.verifyUserHandler)
 
     //Update User
     app.patch("/:userId", {
-        schema: { params: z.object({ userId: z.string() }), body: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }) },
+        schema: {
+            description: "Update user role or department",
+            params: z.object({ userId: z.string() }),
+            body: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }),
+            response: {
+                200: createSuccessResponseSchema(userResponseSchema), //User Updated
+                400: createErrorResponseSchema(), //Please provide either role or department
+                404: createErrorResponseSchema(), //User Not Found
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.updateUserHandler)
 
     //Delete User
     app.delete("/:userId", {
-        schema: { params: z.object({ userId: z.string() }) },
+        schema: {
+            description: "Delete user",
+            params: z.object({ userId: z.string() }),
+            response: {
+                200: createSuccessResponseSchema(), //User Deleted
+                400: createErrorResponseSchema(), //You cannot delete your own account
+                404: createErrorResponseSchema(), //User Not Found
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.MANAGE_USERS])]
     }, AuthController.deleteUserHandler)
 
     //Get All User (ADMIN Can Access All Department Users and Analyst can access only their own department users)
-    app.get("/all", {
-        schema: { querystring: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }) },
+    app.get("/users", {
+        schema: {
+            description: "Get all users",
+            querystring: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }),
+            response: {
+                200: createSuccessResponseSchema(z.array(userResponseSchema)), //Array of Users
+                400: createErrorResponseSchema(), //Please provide either role or department
+                404: createErrorResponseSchema(), //User Not Found
+                500: createErrorResponseSchema() //Internal Server Error
+            }
+        },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.READ_ALL])]
     }, AuthController.getAllUsersHandler)
 }

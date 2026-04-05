@@ -9,7 +9,7 @@ import { ZodError } from "zod";
  * @param {Number} statusCode - HTTP status code (default 200)
 */
 
-export const successResponse = (reply: FastifyReply, responseData = {}, message = "Success", statusCode = 200) => {
+export const successResponse = (reply: FastifyReply, responseData: any, message = "Success", statusCode = 200) => {
     return reply.code(statusCode).send({
         success: true,
         message,
@@ -47,6 +47,7 @@ export const errorResponse = (reply: FastifyReply, message = "Something went wro
         return reply.code(400).send({
             success: false,
             message: "Invalid ID",
+            data: null,
             error: {
                 message: "Invalid Mongoose ID"
             }
@@ -66,7 +67,7 @@ export const errorResponse = (reply: FastifyReply, message = "Something went wro
 
     // Mongo duplicate key error
     if (error && error.code === 11000) {
-        return reply.code(400).send({
+        return reply.code(409).send({
             success: false,
             message: "Already exists",
             data: null,

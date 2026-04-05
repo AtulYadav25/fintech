@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import User from "../models/user.model"
 import { ROLES, UserRole } from "../constants/roles"
 import { errorResponse, successResponse } from "../utils/responseHandler";
-import { loginInput, SignUpInput } from "../validators/auth.schema";
+import { loginInput, SignUpInput, userResponseSchema } from "../validators/auth.schema";
 import { config } from "../config/env";
 import { durationToSeconds, generateToken } from "../utils/jwt";
 
@@ -31,7 +31,7 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return errorResponse(reply, "User already exists", 400);
+            return errorResponse(reply, "User already exists", 409);
         }
 
         // Create new user
@@ -43,15 +43,7 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
             role: role || ROLES.VIEWER
         })
 
-        return successResponse(reply, {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department,
-            isVerified: user.isVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
-        }, "User created successfully", 201);
+        return successResponse(reply, userResponseSchema.parse(user), "User created successfully", 201);
 
     } catch (error) {
         return errorResponse(reply, "Failed to create user", 500, error);
@@ -89,8 +81,12 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
         }
 
         // Check if user is verified
-        if (!user.isVerified || user.isDeleted) {
-            return errorResponse(reply, "Account not verified or deleted.", 403);
+        if (!user.isVerified) {
+            return errorResponse(reply, "Account not verified.", 403);
+        }
+
+        if (user.isDeleted) {
+            return errorResponse(reply, "Account is deleted.", 403);
         }
 
         // Generate JWT Token
@@ -109,15 +105,7 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
             path: "/",
         });
 
-        return successResponse(reply, {
-            name: user.name,
-            email: user.email,
-            department: user.department,
-            role: user.role,
-            isVerified: user.isVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
-        }, "User logged in successfully", 200);
+        return successResponse(reply, userResponseSchema.parse(user), "User logged in successfully", 200);
 
     } catch (error) {
         return errorResponse(reply, "Failed to login user", 500, error);
@@ -196,10 +184,8 @@ export const updateUserHandler = async (req: FastifyRequest<{ Params: { userId: 
         // Update user role
         if (role) user.role = role;
         if (department) user.department = department;
-        await user.save();
-
-        return successResponse(reply, {}, "User updated successfully", 200);
-
+        const updatedUser = await user.save();
+        return successResponse(reply, userResponseSchema.parse(updatedUser), "User updated successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to update user role", 500, error);
     }
@@ -254,7 +240,7 @@ export const getAllUsersHandler = async (req: FastifyRequest<{ Querystring: { ro
         }
 
         const users = await User.find(filter);
-        return successResponse(reply, users, "Users fetched successfully", 200);
+        return successResponse(reply, userResponseSchema.array().parse(users), "Users fetched successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to fetch users", 500, error);
     }

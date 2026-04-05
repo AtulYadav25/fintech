@@ -39,11 +39,8 @@ export const getSessionMessages = async (req: FastifyRequest<{ Params: { id: str
 export const removeChatSession = async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
         const userId = req.user._id;
-        const session = await deleteChatSession(userId, req.params.id);
-        if (!session) {
-            return errorResponse(reply, "Chat session not found", 404);
-        }
-        return successResponse(reply, session, "Chat session deleted successfully", 200);
+        await deleteChatSession(userId, req.params.id);
+        return successResponse(reply, null, "Chat session deleted successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to delete chat session", 500, error);
     }
