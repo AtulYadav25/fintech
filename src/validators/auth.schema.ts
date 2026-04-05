@@ -16,3 +16,16 @@ export const loginSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 chars"),
 });
 export type loginInput = z.infer<typeof loginSchema>;
+
+
+export const userResponseSchema = z.object({
+    _id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    role: z.enum(Object.values(ROLES)),
+    department: z.string(),
+    isVerified: z.boolean(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+});
+export type userResponse = z.infer<typeof userResponseSchema>;

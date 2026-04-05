@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CreateTransactionInput, type GetAllTransactionsParams, GetSummarizeTransactionQuery, UpdateTransactionInput } from "../validators/transaction.schema";
+import { CreateTransactionInput, type GetAllTransactionsParams, GetSummarizeTransactionQuery, TransactionResponseSchema, UpdateTransactionInput } from "../validators/transaction.schema";
 import Transaction from "../models/transaction.model";
 import { errorResponse, paginationResponse, successResponse } from "../utils/responseHandler";
 import { deleteTransaction, getAllTransactions, getTransactionsSummary, updateTransaction } from "../services/transaction.service";
@@ -27,7 +27,7 @@ export const createTransactionHandler = async (req: FastifyRequest<{ Body: Creat
             reference
         });
 
-        return successResponse(reply, transaction, "Transaction created successfully", 201);
+        return successResponse(reply, TransactionResponseSchema.parse(transaction), "Transaction created successfully", 201);
     } catch (error: any) {
         console.log(error)
         return errorResponse(reply, "Failed to create transaction", 500, error);
@@ -64,7 +64,7 @@ export const updateTransactionHandler = async (req: FastifyRequest<{ Body: Updat
         }
         );
 
-        return successResponse(reply, transaction, "Transaction updated successfully", 200);
+        return successResponse(reply, TransactionResponseSchema.parse(transaction), "Transaction updated successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to update transaction", 500, error);
     }
@@ -85,8 +85,8 @@ export const updateTransactionHandler = async (req: FastifyRequest<{ Body: Updat
  */
 export const deleteTransactionHandler = async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-        const transaction = await deleteTransaction(req.params.id);
-        return successResponse(reply, transaction, "Transaction deleted successfully", 200);
+        await deleteTransaction(req.params.id);
+        return successResponse(reply, {}, "Transaction deleted successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to delete transaction", 500, error);
     }
@@ -121,7 +121,7 @@ export const getAllTransactionsHandler = async (req: FastifyRequest<{ Querystrin
         //Returns Paginated Response
         return paginationResponse(
             reply,
-            transactions,
+            TransactionResponseSchema.array().parse(transactions),
             Number(page),
             Number(limit),
             "Transactions fetched successfully",

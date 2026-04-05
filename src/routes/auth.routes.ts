@@ -41,7 +41,7 @@ export const authRoutes = async (app: FastifyInstance) => {
     }, AuthController.deleteUserHandler)
 
     //Get All User (ADMIN Can Access All Department Users and Analyst can access only their own department users)
-    app.get("/all", {
+    app.get("/users", {
         schema: { querystring: z.object({ role: z.enum(Object.values(ROLES)).optional(), department: z.string().optional() }) },
         preHandler: [authMiddleware, hasPermissions([PERMISSIONS.READ_ALL])]
     }, AuthController.getAllUsersHandler)

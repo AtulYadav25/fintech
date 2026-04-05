@@ -2,7 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import User from "../models/user.model"
 import { ROLES, UserRole } from "../constants/roles"
 import { errorResponse, successResponse } from "../utils/responseHandler";
-import { loginInput, SignUpInput } from "../validators/auth.schema";
+import { loginInput, SignUpInput, userResponseSchema } from "../validators/auth.schema";
 import { config } from "../config/env";
 import { durationToSeconds, generateToken } from "../utils/jwt";
 
@@ -43,15 +43,7 @@ export const signUpUserHandler = async (req: FastifyRequest<{ Body: SignUpInput 
             role: role || ROLES.VIEWER
         })
 
-        return successResponse(reply, {
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            department: user.department,
-            isVerified: user.isVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
-        }, "User created successfully", 201);
+        return successResponse(reply, userResponseSchema.parse(user), "User created successfully", 201);
 
     } catch (error) {
         return errorResponse(reply, "Failed to create user", 500, error);
@@ -109,15 +101,7 @@ export const loginUserHandler = async (req: FastifyRequest<{ Body: loginInput }>
             path: "/",
         });
 
-        return successResponse(reply, {
-            name: user.name,
-            email: user.email,
-            department: user.department,
-            role: user.role,
-            isVerified: user.isVerified,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt
-        }, "User logged in successfully", 200);
+        return successResponse(reply, userResponseSchema.parse(user), "User logged in successfully", 200);
 
     } catch (error) {
         return errorResponse(reply, "Failed to login user", 500, error);
@@ -254,7 +238,7 @@ export const getAllUsersHandler = async (req: FastifyRequest<{ Querystring: { ro
         }
 
         const users = await User.find(filter);
-        return successResponse(reply, users, "Users fetched successfully", 200);
+        return successResponse(reply, userResponseSchema.array().parse(users), "Users fetched successfully", 200);
     } catch (error) {
         return errorResponse(reply, "Failed to fetch users", 500, error);
     }

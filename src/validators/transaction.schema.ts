@@ -78,3 +78,20 @@ export const GetSummarizeTransactionQuery = z.object({
 })
 
 export type GetSummarizeTransactionQuery = z.infer<typeof GetSummarizeTransactionQuery>;
+
+
+export const TransactionResponseSchema = z.object({
+    _id: z.string(),
+    amount: z.number(),
+    type: z.enum(Object.values(TRANSACTION_TYPES)),
+    category: z.string(),
+    department: z.string(),
+    date: z.date(),
+    description: z.string().optional(),
+    reference: z.string().optional(),
+    userId: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+})
+
+export type TransactionResponse = z.infer<typeof TransactionResponseSchema>;
