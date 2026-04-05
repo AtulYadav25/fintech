@@ -29,7 +29,7 @@ You have access to a MongoDB database with the following structure:
  * @param sessionId - ID of the session
  * @returns {Promise<{type: "status" | "token" | "done" | "error", message: string}[]>} - SSE Stream
  */
-export const chatWithAI = async (userId: string, message: string, sessionId: string | undefined, reply: FastifyReply) => {
+export const chatWithAI = async ({ userId, role, department }: { userId: string, role: string, department: string }, message: string, sessionId: string | undefined, reply: FastifyReply) => {
     reply.raw.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -74,8 +74,12 @@ ${historyStr}
 Current Request:
 [user]: ${message}
 
+User Info:
+{ userId: ${userId}, role: "${role}", department: "${department}" }
+
 Instructions:
 If the user's request requires fetching data from the MongoDB database, generate a valid JSON object describing the query. Only provide read queries (find or aggregation). Do not provide update queries. Always include { "isDeleted": false } in your filters.
+CRITICAL: If the user's 'role' is NOT 'admin', you MUST strictly add a filter to your query/pipeline to only fetch data where the 'department' field exactly matches the user's department ("${department}"). Do not allow querying data from other departments.
 If no data is needed, return {"collection": null}.
 Return ONLY valid JSON. No markdown formatting or extra text.
 For date filtering, assume dates are ISO strings or construct them properly if aggregate pipeline is used.

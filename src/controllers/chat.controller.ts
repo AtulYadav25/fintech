@@ -5,9 +5,12 @@ import { SendMessageInput } from "../validators/chat.schema";
 
 export const sendMessage = async (req: FastifyRequest<{ Body: SendMessageInput }>, reply: FastifyReply) => {
     const { message, sessionId } = req.body;
-    const userId = req.user._id;
 
-    return chatWithAI(userId, message, sessionId, reply);
+    return chatWithAI({
+        userId: req.user._id,
+        role: req.user.role,
+        department: req.user.department
+    }, message, sessionId, reply);
 };
 
 export const getChatSessions = async (req: FastifyRequest, reply: FastifyReply) => {

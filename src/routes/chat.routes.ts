@@ -1,18 +1,13 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { FastifyInstance } from "fastify";
 import { sendMessage, getChatSessions, getSessionMessages, removeChatSession } from "../controllers/chat.controller";
-import { authMiddleware } from "../middlewares/auth";
-import { ROLES } from "../constants/roles";
+import { authMiddleware, hasPermissions } from "../middlewares/auth";
+import { PERMISSIONS } from "../constants/roles";
 import { sendMessageSchema } from "../validators/chat.schema";
 
 export const chatRoutes = async (app: FastifyInstance) => {
-    const restrictToAnalystOrAdmin = async (req: FastifyRequest, reply: FastifyReply) => {
-        if (req.user.role !== ROLES.ADMIN && req.user.role !== ROLES.ANALYST) {
-            return reply.code(403).send({ message: "Unauthorized: Insufficient permissions for Chat feature" });
-        }
-    };
 
     app.addHook("preHandler", authMiddleware);
-    app.addHook("preHandler", restrictToAnalystOrAdmin);
+    app.addHook("preHandler", hasPermissions([PERMISSIONS.AI_CHAT]));
 
     // Chat functionality endpoints
     app.post("/",

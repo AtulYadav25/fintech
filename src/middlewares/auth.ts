@@ -29,7 +29,6 @@ export const authMiddleware = async (req: FastifyRequest, reply: FastifyReply) =
     }
 };
 
-
 export const hasPermissions = (permission: Permission[]) => {
     return async (req: FastifyRequest, reply: FastifyReply) => {
         try {
